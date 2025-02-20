@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 20px;">
+        <h2>Chat with GPT-4o</h2>
+        <input type="text" id="user-input" placeholder="Type your message..." style="padding: 10px; width: 300px;">
+        <button onclick="sendMessage()" style="padding: 10px; margin-left: 10px;">Send</button>
+        <div id="chat-box" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        // Loading message
+        puter.print(`Loading...`);
+
+        // Function to send the user's message and get a response
+        async function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const chatBox = document.getElementById("chat-box");
+            const userMessage = inputField.value.trim();
+            
+            if (!userMessage) return;
+
+            // Add user's message to chat
+            chatBox.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+
+            // Clear the input field
+            inputField.value = "";
+
+            // Send the user's message to the GPT-4o chatbot
+            puter.ai.chat(userMessage).then(response => {
+                // Add bot's response to chat
+                chatBox.innerHTML += `<div><strong>AI:</strong> ${response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+            });
+        }
+    </script>
+</body>
+</html>
