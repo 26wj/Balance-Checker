@@ -16,7 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
-            background-color: #111;
+            background-color: #121212;
             color: #f4f4f4;
             overflow: hidden;
         }
@@ -29,8 +29,8 @@
             text-align: center;
             font-size: 22px;
             font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .back-btn {
@@ -72,17 +72,19 @@
             justify-content: flex-end;
             font-size: 16px;
             line-height: 1.5;
+            position: relative;
+            animation: fadeIn 1s ease-in-out;
         }
 
         /* User and AI Message Styles */
         .user-message {
-            background-color: #28a745;
+            background-color: #4caf50;
             color: white;
             padding: 12px 20px;
             border-radius: 20px;
-            max-width: 75%;
+            max-width: 70%;
             align-self: flex-end;
-            animation: slideIn 0.4s ease-out;
+            animation: slideIn 0.5s ease-out;
             word-wrap: break-word;
         }
 
@@ -91,9 +93,9 @@
             color: #f4f4f4;
             padding: 12px 20px;
             border-radius: 20px;
-            max-width: 75%;
+            max-width: 70%;
             align-self: flex-start;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.5s ease-out;
             word-wrap: break-word;
         }
 
@@ -102,11 +104,11 @@
             color: #87cefa;
             padding: 12px 20px;
             border-radius: 20px;
-            max-width: 75%;
+            max-width: 70%;
             font-family: 'Courier New', Courier, monospace;
             word-wrap: break-word;
             align-self: flex-start;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .typing-indicator {
@@ -121,10 +123,11 @@
             display: flex;
             padding: 20px;
             background-color: #111;
-            border-top: 1px solid #444;
+            border-top: 2px solid #444;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
         input {
@@ -151,12 +154,13 @@
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
             background-color: #218838;
+            transform: scale(1.1);
         }
 
         /* Scrollbar Customization */
@@ -191,6 +195,25 @@
                 opacity: 1;
             }
         }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            button {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -244,22 +267,30 @@
             loadingIndicator.textContent = 'AI is typing...';
             chatBox.appendChild(loadingIndicator);
 
-            // Send message to GPT-4o
-            const response = await puter.ai.chat(userMessage);
+            try {
+                // Send message to GPT-4o
+                const response = await puter.ai.chat(userMessage);
+                console.log(response); // Debugging the AI response
 
-            // Remove typing indicator
-            loadingIndicator.remove();
+                // Remove typing indicator
+                loadingIndicator.remove();
 
-            // Display AI response
-            let botMessage = response;
+                // Display AI response
+                let botMessage = response;
+                if (botMessage.includes("```")) {
+                    chatBox.innerHTML += `<div class="coding-message"><strong>AI:</strong> ${botMessage}</div>`;
+                } else {
+                    chatBox.innerHTML += `<div class="ai-message"><strong>AI:</strong> ${botMessage}</div>`;
+                }
 
-            // If response contains code-like message
-            if (botMessage.includes("```")) {
-                chatBox.innerHTML += `<div class="coding-message"><strong>AI:</strong> ${botMessage}</div>`;
-            } else {
-                chatBox.innerHTML += `<div class="ai-message"><strong>AI:</strong> ${botMessage}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                // Handle potential error
+                console.error("Error:", error);
+                loadingIndicator.remove();
+                chatBox.innerHTML += `<div class="ai-message"><strong>AI:</strong> Sorry, something went wrong.</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 
