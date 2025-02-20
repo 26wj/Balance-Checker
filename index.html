@@ -4,40 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+        .title-bar {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+        }
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px); /* Account for the title bar height */
+        }
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: flex-end;
+            border-bottom: 1px solid #ddd;
+        }
+        .user-message {
+            background-color: #d1f7d1;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .ai-message {
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            align-self: flex-start;
+        }
+        .typing-indicator {
+            font-size: 14px;
+            color: #888;
+            font-style: italic;
+        }
+        .input-container {
+            display: flex;
+            padding: 15px;
+            background-color: #fff;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #ddd;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #28a745;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; margin-top: 20px;">
-        <h2>Chat with GPT-4o</h2>
-        <input type="text" id="user-input" placeholder="Type your message..." style="padding: 10px; width: 300px;">
-        <button onclick="sendMessage()" style="padding: 10px; margin-left: 10px;">Send</button>
-        <div id="chat-box" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; height: 200px; overflow-y: auto;"></div>
+
+    <div class="title-bar">
+        <button class="back-btn" onclick="goBack()">←</button>
+        Chat with GPT-4o
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type a message..." onkeydown="handleKeyDown(event)" />
+            <button onclick="sendMessage()">+</button>
+        </div>
     </div>
 
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        // Loading message
-        puter.print(`Loading...`);
+        // Handle sending message on Enter key press
+        function handleKeyDown(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
 
-        // Function to send the user's message and get a response
+        // Go back to the previous screen (or reset the chat)
+        function goBack() {
+            // For now, we'll just reset the chat
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+        }
+
+        // Function to handle sending and receiving messages
         async function sendMessage() {
             const inputField = document.getElementById("user-input");
             const chatBox = document.getElementById("chat-box");
             const userMessage = inputField.value.trim();
-            
+
             if (!userMessage) return;
 
-            // Add user's message to chat
-            chatBox.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-
-            // Clear the input field
+            // Display user message
+            chatBox.innerHTML += `<div class="user-message"><strong>You:</strong> ${userMessage}</div>`;
             inputField.value = "";
 
-            // Send the user's message to the GPT-4o chatbot
-            puter.ai.chat(userMessage).then(response => {
-                // Add bot's response to chat
-                chatBox.innerHTML += `<div><strong>AI:</strong> ${response}</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-            });
+            // Scroll to bottom of the chat box
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Show typing indicator while AI is "thinking"
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.classList.add('typing-indicator');
+            loadingIndicator.textContent = 'AI is typing...';
+            chatBox.appendChild(loadingIndicator);
+
+            // Send message to GPT-4o
+            const response = await puter.ai.chat(userMessage);
+
+            // Remove typing indicator
+            loadingIndicator.remove();
+
+            // Display AI response
+            chatBox.innerHTML += `<div class="ai-message"><strong>AI:</strong> ${response}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 </body>
