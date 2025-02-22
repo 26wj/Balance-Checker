@@ -164,6 +164,7 @@
             transition: all 0.3s;
             position: relative;
             animation: slideIn 0.5s ease-out;
+            cursor: pointer;
         }
 
         .game-card:hover {
@@ -186,6 +187,79 @@
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
             color: var(--primary);
+        }
+
+        /* Product Modal Styles */
+        .product-modal .media-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .product-video {
+            width: 100%;
+            height: 250px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: #000;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .spec-item {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .spec-title {
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec-value {
+            font-size: 1.1rem;
+        }
+
+        .carousel-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .carousel-dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .media-carousel {
+            position: relative;
+        }
+
+        .carousel-item {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .carousel-item.active {
+            display: block;
         }
 
         /* Cart System */
@@ -392,6 +466,21 @@
         </div>
     </div>
 
+    <!-- Product Details Modal -->
+    <div class="checkout-modal" id="productModal">
+        <div class="checkout-content" style="max-width: 800px;">
+            <h2 id="productTitle"></h2>
+            <div class="media-carousel">
+                <div class="carousel-controls" id="carouselDots"></div>
+                <div class="media-container" id="mediaContainer"></div>
+            </div>
+            <div class="spec-grid" id="productSpecs"></div>
+            <button class="btn" onclick="addToCart(currentProduct.id)" style="margin-top: 1.5rem;">
+                Add to Cart - $<span id="modalPrice"></span>
+            </button>
+        </div>
+    </div>
+
     <!-- Cookie Consent -->
     <div class="cookie-banner" id="cookieBanner">
         <p>We use cookies to ensure a secure trading experience. 
@@ -462,21 +551,42 @@
     </footer>
 
     <script>
-        // Data
+        // Enhanced Games Data
         const games = [
             {
                 id: 1,
                 title: "2x PUBG Premium Accounts",
                 price: 120,
                 image: "https://media.karousell.com/media/photos/products/2023/11/13/pubg_acc_for_sale_1699852739_6939e2d9_progressive.jpg",
+                videos: [
+                    "https://www.youtube.com/embed/samplevideo1",
+                    "https://www.youtube.com/embed/samplevideo2"
+                ],
+                specs: {
+                    level: "50+",
+                    skins: "20 Rare + 50 Elite",
+                    weapons: "All Mythic ARs + 5 Legendary Snipers",
+                    rank: "Conqueror S12, S13",
+                    matches: "1500+ Battle Royale Matches",
+                    inventory: "5000 UC + 20 Premium Crates"
+                },
                 details: "Includes:\n- 2 Full Access Accounts\n- Level 50+\n- Rare Skins\n- 5000+ UC Each"
             },
             {
                 id: 2,
-                title: "Pubg medium account",
+                title: "Pubg Medium Account",
                 price: 50,
                 image: "https://th.bing.com/th/id/OIP.VYYMj9vx8LrUEqssVXD4RgHaEK?rs=1&pid=ImgDetMain",
-                details: "12 upgradbles\n- 100+ Skins\n- Full Access"
+                videos: ["https://www.youtube.com/embed/samplevideo3"],
+                specs: {
+                    level: "35",
+                    skins: "10 Rare + 15 Elite",
+                    weapons: "3 Mythic ARs + 2 Legendary Snipers",
+                    rank: "Ace Dominator S14",
+                    matches: "800+ Matches",
+                    inventory: "1500 UC + 5 Premium Crates"
+                },
+                details: "12 upgradables\n- 100+ Skins\n- Full Access"
             }
         ];
 
@@ -486,6 +596,62 @@
         let isLogin = true;
         let legalAccepted = false;
         let cookiesAccepted = false;
+        let currentProduct = null;
+        let currentMediaIndex = 0;
+
+        // Product Details Functions
+        function showProductDetails(gameId) {
+            currentProduct = games.find(g => g.id === gameId);
+            currentMediaIndex = 0;
+            
+            document.getElementById('productTitle').textContent = currentProduct.title;
+            document.getElementById('modalPrice').textContent = currentProduct.price;
+            
+            // Media Carousel
+            const mediaContainer = document.getElementById('mediaContainer');
+            mediaContainer.innerHTML = currentProduct.videos.map(video => `
+                <iframe 
+                    class="product-video carousel-item" 
+                    src="${video}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `).join('');
+            
+            // Carousel dots
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = currentProduct.videos.map((_, i) => `
+                <div class="carousel-dot ${i === 0 ? 'active' : ''}" 
+                     onclick="showMedia(${i})"></div>
+            `).join('');
+            
+            // Show first media item
+            document.querySelectorAll('.carousel-item').forEach((item, i) => {
+                item.classList.toggle('active', i === 0);
+            });
+
+            // Specifications
+            const specsContainer = document.getElementById('productSpecs');
+            specsContainer.innerHTML = Object.entries(currentProduct.specs).map(([key, value]) => `
+                <div class="spec-item">
+                    <div class="spec-title">${key.toUpperCase()}</div>
+                    <div class="spec-value">${value}</div>
+                </div>
+            `).join('');
+
+            toggleModal('productModal');
+        }
+
+        function showMedia(index) {
+            currentMediaIndex = index;
+            document.querySelectorAll('.carousel-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
 
         // Core Functions
         function toggleAuth() {
@@ -736,13 +902,13 @@
             initLegal();
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.innerHTML = games.map(game => `
-                <div class="game-card">
+                <div class="game-card" onclick="showProductDetails(${game.id})">
                     <img src="${game.image}" class="game-image" alt="${game.title}">
                     <div class="game-details">
                         <h3 class="game-title">${game.title}</h3>
                         <pre style="margin: 1rem 0; color: var(--light);">${game.details}</pre>
                         <p class="game-price">$${game.price}</p>
-                        <button class="btn" onclick="addToCart(${game.id})">Add to Cart</button>
+                        <button class="btn">View Details</button>
                     </div>
                 </div>
             `).join('');
@@ -751,6 +917,10 @@
             
             window.onclick = function(event) {
                 if (event.target.classList.contains('checkout-modal')) {
+                    // Reset videos when closing modal
+                    document.querySelectorAll('.product-video').forEach(video => {
+                        video.src = video.src;
+                    });
                     event.target.classList.remove('active');
                 }
             }
